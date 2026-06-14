@@ -147,12 +147,11 @@
 
     /* ── Scroll container ── */
     .scroll-viewport {
-      height: 420px;           /* visible window — adjust to taste */
+      height: 420px;
       overflow: hidden;
       position: relative;
     }
 
-    /* fade edges */
     .scroll-viewport::before,
     .scroll-viewport::after {
       content: '';
@@ -175,7 +174,7 @@
 
     @keyframes ticker {
       0%   { transform: translateY(0); }
-      100% { transform: translateY(-50%); }  /* exactly half — duplicate rows fill the rest */
+      100% { transform: translateY(-50%); }
     }
 
     /* ── States ── */
@@ -210,16 +209,13 @@
 
   <!-- Header -->
   <div class="header">
-    <!-- Football SVG icon -->
     <svg class="football-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="24" cy="24" rx="18" ry="11" transform="rotate(-35 24 24)" fill="#8B4513"/>
       <ellipse cx="24" cy="24" rx="18" ry="11" transform="rotate(-35 24 24)" fill="url(#fg)" opacity="0.6"/>
-      <!-- laces -->
       <line x1="24" y1="17" x2="24" y2="31" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
       <line x1="21" y1="20" x2="27" y2="20" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
       <line x1="21" y1="23" x2="27" y2="23" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
       <line x1="21" y1="26" x2="27" y2="26" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
-      <!-- seam curves -->
       <path d="M10 20 Q24 15 38 20" stroke="white" stroke-width="0.8" fill="none" opacity="0.5" transform="rotate(-35 24 24)"/>
       <path d="M10 28 Q24 33 38 28" stroke="white" stroke-width="0.8" fill="none" opacity="0.5" transform="rotate(-35 24 24)"/>
       <defs>
@@ -234,7 +230,7 @@
       <h1>AP Top 25</h1>
       <p id="subtitle">College Football Poll</p>
     </div>
-    <button class="refresh-btn" id="refresh-btn" onclick="loadRankings(true)">↻ Refresh</button>
+    <button class="refresh-btn" id="refresh-btn" onclick="loadRankings(true)">&#8635; Refresh</button>
   </div>
 
   <!-- Body -->
@@ -242,7 +238,7 @@
     <div id="content">
       <div class="loading">
         <div class="spinner"></div>
-        Loading latest rankings…
+        Loading latest rankings&hellip;
       </div>
     </div>
   </div>
@@ -251,77 +247,40 @@
 
 <script>
 const CACHE_KEY = 'ap_top25_cache';
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
-// ── Fetch from Claude API with web search ──────────────────────────────────
-async function fetchFromClaude() {
-  const response = await fetch("https://anthropic-proxy.nancyamedeo.workers.dev/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 2000,
-      tools: [{ type: "web_search_20250305", name: "web_search" }],
-      system: `You are a sports data API. Return ONLY a valid JSON object, no markdown, no explanation.
-Schema:
-{
-  "week": "Week N, Season YYYY",
-  "updated": "Month DD, YYYY",
-  "teams": [
-    { "rank": 1, "name": "Team Name", "conf": "Conference", "record": "W-L", "points": 1550, "prevRank": 1 },
-    ...
-  ]
-}
-- Include all 25 ranked teams.
-- prevRank: previous week's rank (0 = not previously ranked, use "NR" label).
-- points: AP poll voting points.
-- Return ONLY the JSON object.`,
-      messages: [{
-        role: "user",
-        content: "Search for the current AP Top 25 college football poll rankings and return the data as JSON."
-      }]
-    })
-  });
-
+// ── Fetch from ESPN public API (free, no key required) ─────────────────────
+async function fetchRankings() {
+  const url = 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings';
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('ESPN API returned ' + response.status);
   const data = await response.json();
 
-  // Surface any Anthropic error clearly
-  if (!response.ok || data.error) {
-    throw new Error(JSON.stringify(data.error || data));
-  }
-  if (!data.content) {
-    throw new Error("No content in response: " + JSON.stringify(data));
-  }
+  const apPoll = data.rankings && data.rankings.find(r =>
+    r.name && r.name.toLowerCase().includes('associated press')
+  );
+  if (!apPoll) throw new Error('AP Poll not found in ESPN response');
 
-  const text = data.content
-    .filter(b => b.type === 'text')
-    .map(b => b.text)
-    .join('');
+  const teams = apPoll.ranks.map(entry => ({
+    rank:     entry.current,
+    prevRank: entry.previous,
+    name:     entry.team.name,
+    conf:     entry.team.location || '',
+    record:   entry.recordSummary || '',
+    points:   entry.points || null,
+  }));
 
-  // Strip markdown fences and find the JSON object
-  let clean = text.replace(/```json|```/g, '').trim();
-  const jsonStart = clean.indexOf('{');
-  const jsonEnd = clean.lastIndexOf('}');
-  if (jsonStart === -1 || jsonEnd === -1) throw new Error("No JSON found in response: " + clean.slice(0, 300));
-  clean = clean.slice(jsonStart, jsonEnd + 1);
+  const week = apPoll.headline || ('Week ' + (apPoll.occurrenceIndex || ''));
+  const updated = apPoll.lastUpdated
+    ? new Date(apPoll.lastUpdated).toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'})
+    : new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
 
-  let parsed;
-  try {
-    parsed = JSON.parse(clean);
-  } catch(e) {
-    throw new Error("JSON parse failed: " + clean.slice(0, 300));
-  }
-  if (!parsed.teams || !Array.isArray(parsed.teams)) throw new Error("Invalid data: " + clean.slice(0, 200));
-  return parsed;
+  return { week, updated, teams };
 }
 
 // ── Cache helpers ──────────────────────────────────────────────────────────
 function saveCache(data) {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
-  } catch(e) {}
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
 }
-
 function loadCache() {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
@@ -335,90 +294,77 @@ function loadCache() {
 // ── Render ─────────────────────────────────────────────────────────────────
 function render(data) {
   document.getElementById('subtitle').textContent =
-    `${data.week || 'Latest Poll'} · Updated ${data.updated || ''}`;
+    (data.week || 'Latest Poll') + ' \u00b7 Updated ' + (data.updated || '');
 
   const makeRows = (teams) => teams.map(t => {
     const isTop3 = t.rank <= 3;
     let moveBadge = '';
-    if (t.prevRank === 0 || t.prevRank === null || t.prevRank === undefined) {
+    if (!t.prevRank || t.prevRank === 0) {
       moveBadge = '<span class="move move-new">NR</span>';
     } else {
       const diff = t.prevRank - t.rank;
-      if (diff > 0) moveBadge = `<span class="move move-up">&#9650;${diff}</span>`;
-      else if (diff < 0) moveBadge = `<span class="move move-down">&#9660;${Math.abs(diff)}</span>`;
+      if (diff > 0) moveBadge = '<span class="move move-up">&#9650;' + diff + '</span>';
+      else if (diff < 0) moveBadge = '<span class="move move-down">&#9660;' + Math.abs(diff) + '</span>';
     }
-    return `
-      <div class="row">
-        <div class="rank ${isTop3 ? 'top3' : ''}">${t.rank}</div>
-        <div class="team-info">
-          <div class="team-name">${t.name}${moveBadge}</div>
-          <div class="team-conf">${t.conf || ''}</div>
-        </div>
-        <div class="record">${t.record || ''}</div>
-        <div class="pts">${t.points ? t.points.toLocaleString() : '&mdash;'}</div>
-      </div>`;
+    return '<div class="row">' +
+      '<div class="rank ' + (isTop3 ? 'top3' : '') + '">' + t.rank + '</div>' +
+      '<div class="team-info">' +
+        '<div class="team-name">' + t.name + moveBadge + '</div>' +
+        '<div class="team-conf">' + (t.conf || '') + '</div>' +
+      '</div>' +
+      '<div class="record">' + (t.record || '') + '</div>' +
+      '<div class="pts">' + (t.points ? t.points.toLocaleString() : '&mdash;') + '</div>' +
+    '</div>';
   }).join('');
 
-  // ~42px per row; 0.12s per px gives a comfortable pace over 25 teams (~126s)
   const duration = 42 * data.teams.length * 0.12;
 
-  document.getElementById('content').innerHTML = `
-    <div class="col-header">
-      <span>RK</span>
-      <span>TEAM</span>
-      <span class="right">REC</span>
-      <span class="right">PTS</span>
-    </div>
-    <div class="scroll-viewport">
-      <div class="scroll-track" style="animation-duration:${duration}s">
-        ${makeRows(data.teams)}
-        ${makeRows(data.teams)}
-      </div>
-    </div>
-    <div class="footer">Hover to pause &middot; Source: AP Poll &middot; ${new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>
-  `;
+  document.getElementById('content').innerHTML =
+    '<div class="col-header">' +
+      '<span>RK</span><span>TEAM</span>' +
+      '<span class="right">REC</span><span class="right">PTS</span>' +
+    '</div>' +
+    '<div class="scroll-viewport">' +
+      '<div class="scroll-track" style="animation-duration:' + duration + 's">' +
+        makeRows(data.teams) + makeRows(data.teams) +
+      '</div>' +
+    '</div>' +
+    '<div class="footer">Hover to pause &middot; Source: ESPN / AP Poll &middot; ' +
+      new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) +
+    '</div>';
 }
 
 function showError(msg) {
   document.getElementById('content').innerHTML =
-    `<div class="error">⚠ ${msg}<br><br><small>Check your connection or try refreshing.</small></div>`;
+    '<div class="error">&#9888; ' + msg + '<br><br><small>Check your connection or try refreshing.</small></div>';
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────
-async function loadRankings(forceRefresh = false) {
+async function loadRankings(forceRefresh) {
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true;
-  btn.textContent = '↻ Loading…';
+  btn.textContent = '&#8635; Loading\u2026';
 
   if (!forceRefresh) {
     const cached = loadCache();
-    if (cached) {
-      render(cached);
-      btn.disabled = false;
-      btn.textContent = '↻ Refresh';
-      return;
-    }
+    if (cached) { render(cached); btn.disabled = false; btn.textContent = '&#8635; Refresh'; return; }
   }
 
   document.getElementById('content').innerHTML =
-    '<div class="loading"><div class="spinner"></div>Fetching latest rankings…</div>';
+    '<div class="loading"><div class="spinner"></div>Fetching latest rankings&hellip;</div>';
 
   try {
-    const data = await fetchFromClaude();
+    const data = await fetchRankings();
     saveCache(data);
     render(data);
   } catch(e) {
     console.error(e);
-    // Try cache as fallback
     const cached = loadCache();
-    if (cached) {
-      render(cached);
-    } else {
-      showError('Could not load rankings. ' + e.message);
-    }
+    if (cached) { render(cached); }
+    else { showError('Could not load rankings. ' + e.message); }
   } finally {
     btn.disabled = false;
-    btn.textContent = '↻ Refresh';
+    btn.textContent = '&#8635; Refresh';
   }
 }
 
