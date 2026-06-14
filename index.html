@@ -7,30 +7,15 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #111;
-      display: flex;
-      flex-direction: column;
     }
 
-    .widget {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .widget { width: 100%; }
 
-    /* ── Header ── */
     .header {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      flex-shrink: 0;
       padding: 1.25rem 1.5rem;
       display: flex;
       align-items: center;
@@ -38,23 +23,10 @@
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
-    .football-icon {
-      width: 48px;
-      height: 48px;
-      flex-shrink: 0;
-    }
+    .football-icon { width: 48px; height: 48px; flex-shrink: 0; }
 
-    .header-text h1 {
-      font-size: 18px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: 0.01em;
-    }
-    .header-text p {
-      font-size: 12px;
-      color: rgba(255,255,255,0.45);
-      margin-top: 2px;
-    }
+    .header-text h1 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 0.01em; }
+    .header-text p  { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px; }
 
     .refresh-btn {
       margin-left: auto;
@@ -71,40 +43,22 @@
     .refresh-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
     .refresh-btn:disabled { opacity: 0.4; cursor: default; }
 
-    /* ── Scrollable body ── */
-    .body {
-      background: #161616;
-      flex: 1;
-      overflow-y: auto;
-      /* Custom scrollbar */
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255,255,255,0.15) transparent;
-    }
-    .body::-webkit-scrollbar { width: 6px; }
-    .body::-webkit-scrollbar-track { background: transparent; }
-    .body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+    .body { background: #161616; }
 
-    /* ── Column headers ── */
     .col-header {
       display: grid;
       grid-template-columns: 48px 1fr 80px 80px;
       padding: 0.5rem 1.5rem;
       background: rgba(255,255,255,0.03);
       border-bottom: 1px solid rgba(255,255,255,0.06);
-      position: sticky;
-      top: 0;
-      z-index: 5;
     }
     .col-header span {
-      font-size: 10px;
-      font-weight: 600;
+      font-size: 10px; font-weight: 600;
       color: rgba(255,255,255,0.28);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
+      text-transform: uppercase; letter-spacing: 0.07em;
     }
     .col-header .right { text-align: right; }
 
-    /* ── Row ── */
     .row {
       display: grid;
       grid-template-columns: 48px 1fr 80px 80px;
@@ -116,52 +70,28 @@
     .row:last-child { border-bottom: none; }
     .row:hover { background: rgba(255,255,255,0.03); }
 
-    .rank {
-      font-size: 15px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.35);
-      width: 28px;
-    }
+    .rank { font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.35); width: 28px; }
     .rank.top3 { color: #f5a623; }
 
     .team-info { display: flex; flex-direction: column; gap: 1px; }
-    .team-name { font-size: 14px; font-weight: 600; color: #fff; }
-    .team-conf { font-size: 11px; color: rgba(255,255,255,0.28); }
+    .team-name  { font-size: 14px; font-weight: 600; color: #fff; }
+    .team-conf  { font-size: 11px; color: rgba(255,255,255,0.28); }
 
-    .record {
-      font-size: 13px;
-      color: rgba(255,255,255,0.45);
-      text-align: right;
-    }
+    .record { font-size: 13px; color: rgba(255,255,255,0.45); text-align: right; }
+    .pts    { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); text-align: right; }
 
-    .pts {
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.6);
-      text-align: right;
-    }
-
-    /* ── Move indicator ── */
     .move {
-      display: inline-flex;
-      align-items: center;
-      font-size: 9px;
-      font-weight: 700;
-      padding: 1px 4px;
-      border-radius: 3px;
-      margin-left: 5px;
-      vertical-align: middle;
+      display: inline-flex; align-items: center;
+      font-size: 9px; font-weight: 700;
+      padding: 1px 4px; border-radius: 3px; margin-left: 5px; vertical-align: middle;
     }
     .move-up   { background: rgba(52,199,89,0.18);  color: #34c759; }
     .move-down { background: rgba(255,59,48,0.18);  color: #ff3b30; }
     .move-new  { background: rgba(245,166,35,0.2);  color: #f5a623; }
 
-    /* ── States ── */
     .loading, .error {
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-      color: rgba(255,255,255,0.35);
-      font-size: 13px;
+      padding: 2.5rem 1.5rem; text-align: center;
+      color: rgba(255,255,255,0.35); font-size: 13px;
     }
     .error { color: #ff6b6b; }
     .spinner {
@@ -177,16 +107,12 @@
     .footer {
       padding: 0.6rem 1.25rem;
       border-top: 1px solid rgba(255,255,255,0.05);
-      font-size: 10px;
-      color: rgba(255,255,255,0.2);
-      text-align: center;
+      font-size: 10px; color: rgba(255,255,255,0.2); text-align: center;
     }
   </style>
 </head>
 <body>
 <div class="widget">
-
-  <!-- Sticky Header -->
   <div class="header">
     <svg class="football-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <ellipse cx="24" cy="24" rx="18" ry="11" transform="rotate(-35 24 24)" fill="#8B4513"/>
@@ -204,7 +130,6 @@
         </linearGradient>
       </defs>
     </svg>
-
     <div class="header-text">
       <h1>AP Top 25</h1>
       <p id="subtitle">College Football Poll</p>
@@ -212,16 +137,11 @@
     <button class="refresh-btn" id="refresh-btn" onclick="loadRankings(true)">↻ Refresh</button>
   </div>
 
-  <!-- Scrollable List -->
   <div class="body">
     <div id="content">
-      <div class="loading">
-        <div class="spinner"></div>
-        Loading latest rankings…
-      </div>
+      <div class="loading"><div class="spinner"></div>Loading latest rankings…</div>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -236,40 +156,22 @@ async function fetchFromClaude() {
       max_tokens: 2000,
       tools: [{ type: "web_search_20250305", name: "web_search" }],
       system: `You are a sports data API. Return ONLY a valid JSON object, no markdown, no explanation.
-Schema:
-{
-  "week": "Week N, Season YYYY",
-  "updated": "Month DD, YYYY",
-  "teams": [
-    { "rank": 1, "name": "Team Name", "conf": "Conference", "record": "W-L", "points": 1550, "prevRank": 1 },
-    ...
-  ]
-}
-- Include all 25 ranked teams.
-- prevRank: previous week's rank (0 = not previously ranked, use "NR" label).
-- points: AP poll voting points.
-- Return ONLY the JSON object.`,
-      messages: [{
-        role: "user",
-        content: "Search for the current AP Top 25 college football poll rankings and return the data as JSON."
-      }]
+Schema: { "week": "Week N, Season YYYY", "updated": "Month DD, YYYY", "teams": [ { "rank": 1, "name": "Team Name", "conf": "Conference", "record": "W-L", "points": 1550, "prevRank": 1 }, ... ] }
+Include all 25 ranked teams. prevRank: previous week rank (0 = not previously ranked). Return ONLY the JSON object.`,
+      messages: [{ role: "user", content: "Search for the current AP Top 25 college football poll rankings and return the data as JSON." }]
     })
   });
 
   const data = await response.json();
   if (!response.ok || data.error) throw new Error(JSON.stringify(data.error || data));
-  if (!data.content) throw new Error("No content in response: " + JSON.stringify(data));
+  if (!data.content) throw new Error("No content");
 
   const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
   let clean = text.replace(/```json|```/g, '').trim();
-  const jsonStart = clean.indexOf('{');
-  const jsonEnd = clean.lastIndexOf('}');
-  if (jsonStart === -1 || jsonEnd === -1) throw new Error("No JSON found: " + clean.slice(0, 300));
-  clean = clean.slice(jsonStart, jsonEnd + 1);
-
-  let parsed;
-  try { parsed = JSON.parse(clean); }
-  catch(e) { throw new Error("JSON parse failed: " + clean.slice(0, 300)); }
+  const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+  if (s === -1 || e === -1) throw new Error("No JSON in response");
+  clean = clean.slice(s, e + 1);
+  const parsed = JSON.parse(clean);
   if (!parsed.teams || !Array.isArray(parsed.teams)) throw new Error("Invalid data");
   return parsed;
 }
@@ -277,7 +179,6 @@ Schema:
 function saveCache(data) {
   try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
 }
-
 function loadCache() {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
@@ -294,24 +195,23 @@ function render(data) {
 
   const rows = data.teams.map(t => {
     const isTop3 = t.rank <= 3;
-    let moveBadge = '';
-    if (t.prevRank === 0 || t.prevRank === null || t.prevRank === undefined) {
-      moveBadge = '<span class="move move-new">NR</span>';
+    let badge = '';
+    if (!t.prevRank) {
+      badge = '<span class="move move-new">NR</span>';
     } else {
       const diff = t.prevRank - t.rank;
-      if (diff > 0) moveBadge = `<span class="move move-up">▲${diff}</span>`;
-      else if (diff < 0) moveBadge = `<span class="move move-down">▼${Math.abs(diff)}</span>`;
+      if (diff > 0) badge = `<span class="move move-up">▲${diff}</span>`;
+      else if (diff < 0) badge = `<span class="move move-down">▼${Math.abs(diff)}</span>`;
     }
-    return `
-      <div class="row">
-        <div class="rank ${isTop3 ? 'top3' : ''}">${t.rank}</div>
-        <div class="team-info">
-          <div class="team-name">${t.name}${moveBadge}</div>
-          <div class="team-conf">${t.conf || ''}</div>
-        </div>
-        <div class="record">${t.record || ''}</div>
-        <div class="pts">${t.points ? t.points.toLocaleString() : '—'}</div>
-      </div>`;
+    return `<div class="row">
+      <div class="rank ${isTop3 ? 'top3' : ''}">${t.rank}</div>
+      <div class="team-info">
+        <div class="team-name">${t.name}${badge}</div>
+        <div class="team-conf">${t.conf || ''}</div>
+      </div>
+      <div class="record">${t.record || ''}</div>
+      <div class="pts">${t.points ? t.points.toLocaleString() : '—'}</div>
+    </div>`;
   }).join('');
 
   document.getElementById('content').innerHTML = `
@@ -319,8 +219,12 @@ function render(data) {
       <span>RK</span><span>TEAM</span><span class="right">REC</span><span class="right">PTS</span>
     </div>
     ${rows}
-    <div class="footer">Refreshes daily · Source: AP Poll · Last loaded ${new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>
+    <div class="footer">Refreshes daily · Source: AP Poll · Last loaded ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div>
   `;
+
+  // Tell the parent frame to resize to fit all content
+  const totalHeight = document.body.scrollHeight;
+  window.parent.postMessage({ type: 'setHeight', height: totalHeight }, '*');
 }
 
 function showError(msg) {
@@ -330,8 +234,7 @@ function showError(msg) {
 
 async function loadRankings(forceRefresh = false) {
   const btn = document.getElementById('refresh-btn');
-  btn.disabled = true;
-  btn.textContent = '↻ Loading…';
+  btn.disabled = true; btn.textContent = '↻ Loading…';
 
   if (!forceRefresh) {
     const cached = loadCache();
@@ -348,11 +251,10 @@ async function loadRankings(forceRefresh = false) {
   } catch(e) {
     console.error(e);
     const cached = loadCache();
-    if (cached) { render(cached); }
-    else { showError('Could not load rankings. ' + e.message); }
+    if (cached) render(cached);
+    else showError('Could not load rankings. ' + e.message);
   } finally {
-    btn.disabled = false;
-    btn.textContent = '↻ Refresh';
+    btn.disabled = false; btn.textContent = '↻ Refresh';
   }
 }
 
