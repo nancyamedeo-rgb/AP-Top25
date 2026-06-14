@@ -69,7 +69,7 @@
 
     /* ── Body ── */
     .body {
-      background: #161616;
+      background: transparent;
       border: 1px solid rgba(255,255,255,0.08);
       border-top: none;
       border-radius: 0 0 14px 14px;
@@ -162,8 +162,8 @@
       z-index: 2;
       pointer-events: none;
     }
-    .scroll-viewport::before { top: 0;    background: linear-gradient(to bottom, #161616, transparent); }
-    .scroll-viewport::after  { bottom: 0; background: linear-gradient(to top,   #161616, transparent); }
+    .scroll-viewport::before { top: 0;    background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
+    .scroll-viewport::after  { bottom: 0; background: linear-gradient(to top,   rgba(0,0,0,0.6), transparent); }
 
     .scroll-track {
       display: flex;
