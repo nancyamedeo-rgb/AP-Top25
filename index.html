@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -145,6 +144,39 @@
     .move-up   { background: rgba(52,199,89,0.18);  color: #34c759; }
     .move-down { background: rgba(255,59,48,0.18);  color: #ff3b30; }
     .move-new  { background: rgba(245,166,35,0.2);  color: #f5a623; }
+
+    /* ── Scroll container ── */
+    .scroll-viewport {
+      height: 420px;           /* visible window — adjust to taste */
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* fade edges */
+    .scroll-viewport::before,
+    .scroll-viewport::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 40px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .scroll-viewport::before { top: 0;    background: linear-gradient(to bottom, #161616, transparent); }
+    .scroll-viewport::after  { bottom: 0; background: linear-gradient(to top,   #161616, transparent); }
+
+    .scroll-track {
+      display: flex;
+      flex-direction: column;
+      animation: ticker linear infinite;
+      animation-play-state: running;
+    }
+    .scroll-track:hover { animation-play-state: paused; }
+
+    @keyframes ticker {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-50%); }  /* exactly half — duplicate rows fill the rest */
+    }
 
     /* ── States ── */
     .loading, .error {
@@ -305,17 +337,16 @@ function render(data) {
   document.getElementById('subtitle').textContent =
     `${data.week || 'Latest Poll'} · Updated ${data.updated || ''}`;
 
-  const rows = data.teams.map(t => {
+  const makeRows = (teams) => teams.map(t => {
     const isTop3 = t.rank <= 3;
     let moveBadge = '';
     if (t.prevRank === 0 || t.prevRank === null || t.prevRank === undefined) {
       moveBadge = '<span class="move move-new">NR</span>';
     } else {
       const diff = t.prevRank - t.rank;
-      if (diff > 0) moveBadge = `<span class="move move-up">▲${diff}</span>`;
-      else if (diff < 0) moveBadge = `<span class="move move-down">▼${Math.abs(diff)}</span>`;
+      if (diff > 0) moveBadge = `<span class="move move-up">&#9650;${diff}</span>`;
+      else if (diff < 0) moveBadge = `<span class="move move-down">&#9660;${Math.abs(diff)}</span>`;
     }
-
     return `
       <div class="row">
         <div class="rank ${isTop3 ? 'top3' : ''}">${t.rank}</div>
@@ -324,9 +355,12 @@ function render(data) {
           <div class="team-conf">${t.conf || ''}</div>
         </div>
         <div class="record">${t.record || ''}</div>
-        <div class="pts">${t.points ? t.points.toLocaleString() : '—'}</div>
+        <div class="pts">${t.points ? t.points.toLocaleString() : '&mdash;'}</div>
       </div>`;
   }).join('');
+
+  // ~42px per row; 0.12s per px gives a comfortable pace over 25 teams (~126s)
+  const duration = 42 * data.teams.length * 0.12;
 
   document.getElementById('content').innerHTML = `
     <div class="col-header">
@@ -335,8 +369,13 @@ function render(data) {
       <span class="right">REC</span>
       <span class="right">PTS</span>
     </div>
-    ${rows}
-    <div class="footer">Refreshes daily · Source: AP Poll · Last loaded ${new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>
+    <div class="scroll-viewport">
+      <div class="scroll-track" style="animation-duration:${duration}s">
+        ${makeRows(data.teams)}
+        ${makeRows(data.teams)}
+      </div>
+    </div>
+    <div class="footer">Hover to pause &middot; Source: AP Poll &middot; ${new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>
   `;
 }
 
