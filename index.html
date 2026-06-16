@@ -25,18 +25,18 @@
       border-bottom: none;
     }
 
-    .football-icon { width: 48px; height: 48px; flex-shrink: 0; }
+    .football-icon { width: 64px; height: 64px; flex-shrink: 0; }
 
-    .header-text h1 { font-size: 24px; font-weight: 700; color: #fff; letter-spacing: 0.01em; }
-    .header-text p  { font-size: 16px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .header-text h1 { font-size: 36px; font-weight: 700; color: #fff; letter-spacing: 0.01em; }
+    .header-text p  { font-size: 22px; color: rgba(255,255,255,0.45); margin-top: 2px; }
 
     .refresh-btn {
       margin-left: auto;
       background: rgba(255,255,255,0.07);
       border: 1px solid rgba(255,255,255,0.12);
       color: rgba(255,255,255,0.55);
-      font-size: 11px;
-      padding: 5px 12px;
+      font-size: 16px;
+      padding: 7px 16px;
       border-radius: 20px;
       cursor: pointer;
       transition: all 0.15s;
@@ -54,13 +54,13 @@
 
     .col-header {
       display: grid;
-      grid-template-columns: 36px 1fr 60px 60px;
+      grid-template-columns: 52px 1fr 80px 80px;
       padding: 0.5rem 1.25rem;
       background: transparent;
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .col-header span {
-      font-size: 10px; font-weight: 600;
+      font-size: 15px; font-weight: 600;
       color: rgba(255,255,255,0.28);
       text-transform: uppercase; letter-spacing: 0.07em;
     }
@@ -68,36 +68,36 @@
 
     .row {
       display: grid;
-      grid-template-columns: 36px 1fr 60px 60px;
+      grid-template-columns: 52px 1fr 80px 80px;
       align-items: center;
-      padding: 0.6rem 1.25rem;
+      padding: 0.75rem 1.25rem;
       border-bottom: 1px solid rgba(255,255,255,0.04);
       transition: background 0.1s;
     }
     .row:last-child { border-bottom: none; }
     .row:hover { background: rgba(255,255,255,0.03); }
 
-    .rank { font-size: 20px; font-weight: 700; color: rgba(255,255,255,0.35); width: 28px; }
+    .rank { font-size: 30px; font-weight: 700; color: rgba(255,255,255,0.35); width: 44px; }
     .rank.top3 { color: #f5a623; }
 
-    .team-info { display: flex; flex-direction: column; gap: 1px; }
-    .team-name { font-size: 20px; font-weight: 600; color: #fff; }
-    .team-conf { font-size: 18px; color: rgba(255,255,255,0.28); }
+    .team-info { display: flex; flex-direction: column; gap: 2px; }
+    .team-name { font-size: 28px; font-weight: 600; color: #fff; }
+    .team-conf { font-size: 22px; color: rgba(255,255,255,0.28); }
 
-    .record { font-size: 20px; color: rgba(255,255,255,0.45); text-align: right; }
-    .pts    { font-size: 20px; font-weight: 600; color: rgba(255,255,255,0.6); text-align: right; }
+    .record { font-size: 26px; color: rgba(255,255,255,0.45); text-align: right; }
+    .pts    { font-size: 26px; font-weight: 600; color: rgba(255,255,255,0.6); text-align: right; }
 
     .move {
       display: inline-flex; align-items: center;
-      font-size: 9px; font-weight: 700;
-      padding: 1px 4px; border-radius: 3px;
-      margin-left: 5px; vertical-align: middle;
+      font-size: 13px; font-weight: 700;
+      padding: 2px 5px; border-radius: 3px;
+      margin-left: 6px; vertical-align: middle;
     }
     .move-up   { background: rgba(52,199,89,0.18);  color: #34c759; }
     .move-down { background: rgba(255,59,48,0.18);  color: #ff3b30; }
     .move-new  { background: rgba(245,166,35,0.2);  color: #f5a623; }
 
-    .scroll-viewport { height: 420px; overflow: hidden; position: relative; }
+    .scroll-viewport { height: 480px; overflow: hidden; position: relative; }
     .scroll-viewport::before,
     .scroll-viewport::after {
       content: ''; position: absolute; left: 0; right: 0; height: 40px; z-index: 2; pointer-events: none;
@@ -133,7 +133,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .footer {
-      padding: 0.6rem 1.25rem;
+      padding: 0.75rem 1.25rem;
       border-top: 1px solid rgba(255,255,255,0.05);
       font-size: 10px; color: rgba(255,255,255,0.2); text-align: center;
     }
